@@ -39,8 +39,13 @@ public class HomeController {
             model.addAttribute("credentials", this.credentialService.getCredentials());
             model.addAttribute("encryptionService", this.encryptionService);
         }
-
         return "home";
+    }
+
+    @PostMapping("/logout")
+    public String logout() {
+        System.out.println("works");
+        return "redirect:/login?logout";
     }
 
 }
