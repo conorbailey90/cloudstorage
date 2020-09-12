@@ -10,6 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 @Service
@@ -47,4 +48,5 @@ public class EncryptionService {
 
         return new String(decryptedValue);
     }
+
 }

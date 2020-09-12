@@ -8,6 +8,7 @@ import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,43 +18,54 @@ public class NoteService {
     private final NoteMapper noteMapper;
     private final UserMapper userMapper;
 
-//    private List<Note> notes;
+    private List<Note> notes;
 
-    public NoteService(NoteMapper noteMapper, UserMapper userMapper){
+    public NoteService(NoteMapper noteMapper, UserMapper userMapper) {
         this.noteMapper = noteMapper;
         this.userMapper = userMapper;
 
     }
 
-//    @PostConstruct
-//    public void postConstruct(){
-//        this.notes = new ArrayList<>();
-//
-//    }
+    @PostConstruct
+    public void postConstruct() {
+        this.notes = new ArrayList<>();
 
-//    public void addNote(NoteForm noteForm){
-//        Note note = new Note();
-//        note.setNoteid(1);
-//        note.setNotedescription(noteForm.getNoteDescription());
-//        note.setNotetitle(noteForm.getNoteTitle());
-//        note.setUserid(1);
-//        notes.add(note);
-//    }
+    }
 
-    public int addNote(NoteForm noteForm){
+    public List<Note> getNotes() {
+        int userId = getLoggedInUserId();
+        this.notes = noteMapper.getNotesForUser(userId);
+        return new ArrayList<>(this.notes);
+    }
 
-        String loggedInUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        User loggedInUser = userMapper.getUser(loggedInUsername);
+    public int addNote(NoteForm noteForm) {
+        int userId = getLoggedInUserId();
         String noteTitle = noteForm.getNoteTitle();
         String noteDescription = noteForm.getNoteDescription();
-        int row = noteMapper.addNote(new Note(null, noteTitle,noteDescription,loggedInUser.getUserId()));
-        System.out.println(row);
+        Note note = new Note(null, noteTitle, noteDescription, userId);
+        int row = noteMapper.addNote(note);
+        System.out.println(note.getNoteId());
+        return note.getNoteId();
+    }
+
+    public int updateNote(NoteForm noteForm) {
+        int noteId = noteForm.getNoteId();
+        int userId = getLoggedInUserId();
+        Note note = new Note(noteId, noteForm.getNoteTitle(), noteForm.getNoteDescription(), userId);
+        int row = noteMapper.updateNote(note);
         return row;
     }
 
-
-    public List<Note> getNotes(){
-//        return new ArrayList<>(this.notes);
-        return new ArrayList<>();
+    public int deleteNote(int noteId) {
+        int deletedNote = noteMapper.deleteNote(noteId);
+        return deletedNote;
     }
+
+    public int getLoggedInUserId() {
+        String loggedInUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedInUser = userMapper.getUser(loggedInUsername);
+        int userId = loggedInUser.getUserId();
+        return userId;
+    }
+
 }
